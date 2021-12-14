@@ -1,5 +1,5 @@
 {
-  "name": "tsdev",
+  "name": "tshot",
   "version": "0.0.0",
   "description": "Like nodemon but very esbuild",
   "publishConfig": {

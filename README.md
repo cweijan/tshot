@@ -2,13 +2,13 @@
 
 ---
 
-# tsdev
+# tshot
 
 
 ## Install
 
 ```bash
-npm i -D tsdev
+npm i -D tshot
 ```
 
 ## Usage
@@ -16,7 +16,7 @@ npm i -D tsdev
 **Run a script: (for development)**
 
 ```
-tsdev your-script.ts
+tshot your-script.ts
 ```
 
 This will also watch all the files imported by `your-script.ts` and re-run it on changes.
@@ -26,7 +26,7 @@ Note that this command will emit temporary files to `./temp` folder, it's recomm
 **Build a script: (for production)**
 
 ```
-tsdev build your-scripts.ts
+tshot build your-scripts.ts
 ```
 
 This command will emit bundled script to `./dist` folder with a filename matching the original filename. i.e. here you will get `./dist/your-script.js`.
