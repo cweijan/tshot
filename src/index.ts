@@ -5,31 +5,20 @@ import spawn from 'cross-spawn'
 import { watch } from 'chokidar'
 import kill from 'tree-kill'
 
-const readPkg = () => {
+const externals = (() => {
   try {
-    return JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf8'))
-  } catch (err) {
-    return {}
+    return Object.keys(require("./package.json").dependencies || {});
+  } catch (error) {
+    return []
   }
-}
+})()
 
-const killProcess = ({
-  pid,
-  signal = 'SIGTERM',
-}: {
-  pid: number
-  signal?: string | number
-}) =>
+const killProcess = ({ pid, signal = 'SIGTERM', }: { pid: number, signal?: string | number }) =>
   new Promise<unknown>((resolve) => {
     kill(pid, signal, resolve)
   })
 
 export const build = async (file: string, outDir: string) => {
-  const pkg = readPkg()
-  const externals = [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.peerDependencies || {}),
-  ]
   const result = await esbuild({
     entryPoints: [file],
     format: 'cjs',
@@ -44,13 +33,7 @@ export const build = async (file: string, outDir: string) => {
         name: 'externalize-deps',
         setup(build) {
           build.onResolve({ filter: /.+/ }, (args) => {
-            if (
-              externals.some(
-                (external) =>
-                  args.path === external ||
-                  args.path.startsWith(`${external}/`),
-              )
-            ) {
+            if (externals.some((external) => args.path === external || args.path.startsWith(`${external}/`),)) {
               return {
                 path: args.path,
                 external: true,
@@ -98,11 +81,11 @@ export const run = async (file: string) => {
     ignorePermissionErrors: true,
     cwd: process.cwd(),
   }).on('all', async (event, filepath) => {
-    if(process.platform=='win32'){
-      filepath=filepath.replace(/\\/g,'/')
+    if (process.platform == 'win32') {
+      filepath = filepath.replace(/\\/g, '/')
     }
     if (watchFiles.has(filepath)) {
-      await killProcess({ pid: cmd.pid })
+      await killProcess({ pid: cmd.pid as number })
       const result = await build(file, 'temp')
       watchFiles = result.watchFiles
       filepath = result.filepath
