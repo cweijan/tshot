@@ -5,9 +5,13 @@ import spawn from 'cross-spawn'
 import { watch } from 'chokidar'
 import kill from 'tree-kill'
 
+const esbuildConfig = (()=>{
+  return fs.existsSync("./esbuild.json") ? JSON.parse(fs.readFileSync(path.resolve('esbuild.json'),'utf-8')) : {}
+})();
+
 const externals = (() => {
   try {
-    return Object.keys(require("./package.json").dependencies || {});
+    return Object.keys(JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf8')).dependencies || {});
   } catch (error) {
     return []
   }
@@ -20,6 +24,7 @@ const killProcess = ({ pid, signal = 'SIGTERM', }: { pid: number, signal?: strin
 
 export const build = async (file: string, outDir: string) => {
   const result = await esbuild({
+    ...esbuildConfig,
     entryPoints: [file],
     format: 'cjs',
     bundle: true,
@@ -56,7 +61,7 @@ export const build = async (file: string, outDir: string) => {
 }
 
 export const run = async (file: string) => {
-  let { watchFiles, filepath } = await build(file, 'temp')
+  let { watchFiles, filepath } = await build(file, 'build')
 
   const startCommand = () => {
     const cmd = spawn('node', [filepath], {
