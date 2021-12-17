@@ -24,7 +24,6 @@ const killProcess = ({ pid, signal = 'SIGTERM', }: { pid: number, signal?: strin
 
 export const build = async (file: string, outDir: string) => {
   const result = await esbuild({
-    ...esbuildConfig,
     entryPoints: [file],
     format: 'cjs',
     bundle: true,
@@ -48,6 +47,7 @@ export const build = async (file: string, outDir: string) => {
         },
       },
     ],
+    ...esbuildConfig,
   })
   const output = result.outputFiles[0]
   fs.mkdirSync(path.dirname(output.path), { recursive: true })
