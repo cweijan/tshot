@@ -81,7 +81,7 @@ export const run = async (file: string) => {
   let cmd = startCommand()
 
   watch('.', {
-    ignored: '**/{node_modules,dist,temp,.git}/**',
+    ignored: '**/{node_modules,dist,build,.git}/**',
     ignoreInitial: true,
     ignorePermissionErrors: true,
     cwd: process.cwd(),
@@ -91,7 +91,7 @@ export const run = async (file: string) => {
     }
     if (watchFiles.has(filepath)) {
       await killProcess({ pid: cmd.pid as number })
-      const result = await build(file, 'temp')
+      const result = await build(file, 'build')
       watchFiles = result.watchFiles
       filepath = result.filepath
       cmd = startCommand()
