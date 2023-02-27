@@ -18,6 +18,10 @@ cli.command('build [file]', 'Build a file').action(async (file) => {
   await build(file, 'dist')
 })
 
-cli.version(version)
-cli.help()
-cli.parse()
+cli
+  .option('--color', 'Force using color.')
+  .option('--single', 'Single mode, not watch files.')
+  .option('--noDependencies', "Don't including dependencies.")
+  .version(version)
+  .help()
+  .parse()
