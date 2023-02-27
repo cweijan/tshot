@@ -4,8 +4,9 @@ import { build as esbuild } from 'esbuild'
 import spawn from 'cross-spawn'
 import { watch } from 'chokidar'
 import kill from 'tree-kill'
-const color = process.argv.indexOf('--color') >= 0;
-const isSingle = process.argv.indexOf('--single') >= 0;
+const color = process.argv.includes('--color');
+const isSingle = process.argv.includes('--single');
+const noDependencies = process.argv.includes('----no-dependencies');
 
 const esbuildConfig = (() => {
   return fs.existsSync("./esbuild.json") ? JSON.parse(fs.readFileSync(path.resolve('esbuild.json'), 'utf-8')) : {}
@@ -34,7 +35,7 @@ export const build = async (file: string, outDir: string) => {
     metafile: true,
     write: false,
     target: `node${process.version.slice(1)}`,
-    plugins: [
+    plugins: noDependencies ? [
       {
         name: 'externalize-deps',
         setup(build) {
@@ -48,7 +49,7 @@ export const build = async (file: string, outDir: string) => {
           })
         },
       },
-    ],
+    ] : [],
     ...esbuildConfig,
   })
   const output = result.outputFiles[0]
