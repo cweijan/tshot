@@ -2,7 +2,7 @@
 import { cac } from 'cac'
 import { version } from '../package.json'
 
-const cli = cac('esmon')
+const cli = cac('tshot')
 
 cli.command('[file]', 'Run a file').action(async (file) => {
   if (!file) return cli.outputHelp()

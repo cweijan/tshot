@@ -4,9 +4,11 @@ import { build as esbuild } from 'esbuild'
 import spawn from 'cross-spawn'
 import { watch } from 'chokidar'
 import kill from 'tree-kill'
+const color = process.argv.indexOf('--color') >= 0;
+const isSingle = process.argv.indexOf('--single') >= 0;
 
-const esbuildConfig = (()=>{
-  return fs.existsSync("./esbuild.json") ? JSON.parse(fs.readFileSync(path.resolve('esbuild.json'),'utf-8')) : {}
+const esbuildConfig = (() => {
+  return fs.existsSync("./esbuild.json") ? JSON.parse(fs.readFileSync(path.resolve('esbuild.json'), 'utf-8')) : {}
 })();
 
 const externals = (() => {
@@ -60,14 +62,14 @@ export const build = async (file: string, outDir: string) => {
   }
 }
 
-export const run = async (file: string) => {
+export const run = async (file: string, singleMode: boolean = isSingle) => {
   let { watchFiles, filepath } = await build(file, 'build')
 
   const startCommand = () => {
     const cmd = spawn('node', [filepath], {
       env: {
-        FORCE_COLOR: '1',
-        NPM_CONFIG_COLOR: 'always',
+        FORCE_COLOR: color ? '1' : undefined,
+        NPM_CONFIG_COLOR: color ? 'always' : undefined,
         ...process.env,
       },
       stdio: 'pipe',
@@ -79,6 +81,8 @@ export const run = async (file: string) => {
   }
 
   let cmd = startCommand()
+
+  if (singleMode) { return; }
 
   watch('.', {
     ignored: '**/{node_modules,dist,build,.git}/**',
