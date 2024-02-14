@@ -30,6 +30,7 @@ export const build = async (file: string, outDir: string) => {
     entryPoints: [file],
     format: 'cjs',
     bundle: true,
+    sourcemap: true,
     outdir: outDir,
     platform: 'node',
     metafile: true,
@@ -52,14 +53,17 @@ export const build = async (file: string, outDir: string) => {
     ] : [],
     ...esbuildConfig,
   })
-  const output = result.outputFiles[0]
-  fs.mkdirSync(path.dirname(output.path), { recursive: true })
-  fs.writeFileSync(output.path, output.text, 'utf8')
+  let buildFile: any;
+  for (const output of result.outputFiles) {
+    if (!output.path.match(/\.map$/)) buildFile = output;
+    fs.mkdirSync(path.dirname(output.path), { recursive: true })
+    fs.writeFileSync(output.path, output.text, 'utf8')
+  }
   return {
     get watchFiles() {
       return new Set(Object.keys(result.metafile?.inputs || {}))
     },
-    filepath: output.path,
+    filepath: buildFile.path,
   }
 }
 
