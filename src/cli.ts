@@ -9,14 +9,14 @@ cli.command('[file]', 'Run a file').action(async (file) => {
 
   const { run } = await import('./')
   await run(file)
-})
+}).allowUnknownOptions()
 
 cli.command('build [file]', 'Build a file').action(async (file) => {
   if (!file) return cli.outputHelp()
 
   const { build } = await import('./')
   await build(file, 'dist')
-})
+}).allowUnknownOptions()
 
 cli
   .option('--color', 'Force using color.')
