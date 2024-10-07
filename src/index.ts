@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { build as esbuild } from 'esbuild'
+import { build as esbuild, PluginBuild } from 'esbuild'
 import spawn from 'cross-spawn'
 import { watch } from 'chokidar'
 import kill from 'tree-kill'
@@ -39,7 +39,7 @@ export const build = async (file: string, outDir: string) => {
     plugins: noDependencies ? [
       {
         name: 'externalize-deps',
-        setup(build) {
+        setup(build: PluginBuild) {
           build.onResolve({ filter: /.+/ }, (args) => {
             if (externals.some((external) => args.path === external || args.path.startsWith(`${external}/`),)) {
               return {
@@ -54,10 +54,12 @@ export const build = async (file: string, outDir: string) => {
     ...esbuildConfig,
   })
   let buildFile: any;
-  for (const output of result.outputFiles) {
-    if (!output.path.match(/\.map$/)) buildFile = output;
-    fs.mkdirSync(path.dirname(output.path), { recursive: true })
-    fs.writeFileSync(output.path, output.text, 'utf8')
+  if (result.outputFiles) {
+    for (const output of result.outputFiles) {
+      if (!output.path.match(/\.map$/)) buildFile = output;
+      fs.mkdirSync(path.dirname(output.path), { recursive: true })
+      fs.writeFileSync(output.path, output.text, 'utf8')
+    }
   }
   return {
     get watchFiles() {
